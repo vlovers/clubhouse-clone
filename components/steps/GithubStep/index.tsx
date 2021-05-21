@@ -1,39 +1,40 @@
 import clsx from 'clsx';
+import Cookies from 'js-cookie';
 import { WhiteBlock } from '../../WhiteBlock';
 import { Button } from '../../Button';
 import { StepInfo } from '../../StepInfo';
 
-import styles from './GithubStep.module.scss';
+import styles from './GitHubStep.module.scss';
 import React from 'react';
-import { MainContext } from '../../../pages';
+import { MainContext, UserData } from '../../../pages';
 
-export const GithubStep: React.FC = () => {
-  const { onNextStep } = React.useContext(MainContext);
+export const GitHubStep: React.FC = () => {
+  const { onNextStep, setUserData } = React.useContext(MainContext);
 
   const onClickAuth = () => {
-    const win = window.open(
+    window.open(
       'http://localhost:3001/auth/github',
       'Auth',
       'width=500,height=500,status=yes,toolbar=no,menubar=no,location=no',
     );
-
-    const timer = setInterval(() => {
-      if (win.closed) {
-        clearInterval(timer);
-        onNextStep();
-      }
-    }, 100);
   };
 
   React.useEffect(() => {
-    window.addEventListener('message', (data) => {
-      console.log(data);
+    window.addEventListener('message', ({ data, origin }) => {
+      const user: string = data;
+      if (typeof user === 'string' && user.includes('avatarUrl')) {
+        Cookies.remove('token');
+        const json: UserData = JSON.parse(user);
+        setUserData(json);
+        onNextStep();
+        Cookies.set('token', json.token);
+      }
     });
   }, []);
 
   return (
     <div className={styles.block}>
-      <StepInfo icon="/static/connect.png" title="Do you want import info from Twitter?" />
+      <StepInfo icon="/static/connect.png" title="Do you want import info from GitHub?" />
       <WhiteBlock className={clsx('m-auto mt-40', styles.whiteBlock)}>
         <div className={styles.avatar}>
           <b>AD</b>
@@ -51,8 +52,11 @@ export const GithubStep: React.FC = () => {
           </svg>
         </div>
         <h2 className="mb-40">Archakov Dennis</h2>
-        <Button onClick={onClickAuth}>
-          <img src="/static/twitter.svg" alt="Twitter logo" className={styles.twitterLogo} />
+        <Button
+          onClick={onClickAuth}
+          className={clsx(styles.button, 'd-i-flex align-items-center')}>
+          <img className="d-ib mr-10" src="/static/github.svg" />
+
           Import from GitHub
           <img className="d-ib ml-10" src="/static/arrow.svg" />
         </Button>

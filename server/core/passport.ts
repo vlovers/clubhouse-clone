@@ -1,6 +1,6 @@
 import passport from 'passport';
 import { Strategy as GithubStrategy } from 'passport-github';
-import { User } from '../../models';
+import User  from '../../models';
 
 passport.use(
     'github',
@@ -35,7 +35,6 @@ passport.use(
 
                 done(null, findUser)
 
-                
                 
 
             } catch (error) {

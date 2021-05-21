@@ -4,7 +4,7 @@ import { useRouter } from 'next/router';
 import { WhiteBlock } from '../../WhiteBlock';
 import { Button } from '../../Button';
 import { StepInfo } from '../../StepInfo';
-import Axios from '../../../core/axios';
+import { Axios } from '../../../core/axios';
 
 import styles from './EnterPhoneStep.module.scss';
 
@@ -12,7 +12,7 @@ export const EnterCodeStep = () => {
   const router = useRouter();
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
   const [codes, setCodes] = React.useState(['', '', '', '']);
-  const nextDisabled = codes.some((v) => !v);
+
 
   const handleChangeInput = (event: React.ChangeEvent<HTMLInputElement>) => {
     const index = Number(event.target.getAttribute('id'));
@@ -24,20 +24,22 @@ export const EnterCodeStep = () => {
     });
     if (event.target.nextSibling) {
       (event.target.nextSibling as HTMLInputElement).focus();
+    } else {
+      onSubmit([...codes, value].join(''));
     }
   };
 
-  const onSubmit = async () => {
+  const onSubmit = async (code: string) => {
     try {
       setIsLoading(true);
       await Axios.get('/todos');
+      await Axios.get(`/auth/sms/activate?code=${code}`);
       router.push('/rooms');
     } catch (error) {
       alert('Ошибка при активации!');
+      setCodes(['', '', '', '']);
     }
-
-    setIsLoading(false);
-  };
+  }
 
   return (
     <div className={styles.block}>
@@ -45,7 +47,7 @@ export const EnterCodeStep = () => {
         <>
           <StepInfo icon="/static/numbers.png" title="Enter your activate code" />
           <WhiteBlock className={clsx('m-auto mt-30', styles.whiteBlock)}>
-            <div className={clsx('mb-30', styles.codeInput)}>
+            <div className={styles.codeInput}>
               {codes.map((code, index) => (
                 <input
                   key={index}
@@ -58,10 +60,6 @@ export const EnterCodeStep = () => {
                 />
               ))}
             </div>
-            <Button onClick={onSubmit} disabled={nextDisabled}>
-              Next
-              <img className="d-ib ml-10" src="/static/arrow.svg" />
-            </Button>
           </WhiteBlock>
         </>
       ) : (
