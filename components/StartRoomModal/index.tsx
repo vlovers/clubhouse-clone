@@ -1,65 +1,86 @@
-
-import React from 'react';
-import { Avatar } from '../Avatar';
-
-import styles from './ConversationCard.module.scss';
-import whiteBlockStyles from '../WhiteBlock/WhiteBlock.module.scss';
 import clsx from 'clsx';
+import { useRouter } from 'next/router';
+import React from 'react';
+import { RoomApi, RoomType } from '../../api/RoomApi';
+import { Axios } from '../../core/axios';
+import { Button } from '../Button';
 
-interface ConversationCard {
-  title: string;
-  speakers: string[];
-  avatars: string[];
-  listenersCount: number;
+import styles from './StartRoomModal.module.scss';
+
+interface StartRoomModalProps {
+  onClose: () => void;
 }
 
-export const ConversationCard: React.FC<ConversationCard> = ({
-  title,
-  speakers = [],
-  avatars = [],
-  listenersCount,
+export const StartRoomModal: React.FC<StartRoomModalProps> = ({ onClose }) => {
+  const router = useRouter();
+  const [title, setTitle] = React.useState<string>('');
+  const [type, setType] = React.useState<RoomType>('open');
 
-}) => {
+  const onSubmit = async () => {
+    try {
+      if (!title) {
+        return alert('Укажите заголовок комнаты');
+      }
+      const room = await RoomApi(Axios).createRoom({
+        title,
+        type,
+      });
+      router.push(`/rooms/${room.id}`);
+    } catch (error) {
+      alert('Ошибка при создании команты');
+    }
+  };
+
   return (
-    <div className={clsx(whiteBlockStyles.block, styles.card, 'mb-30')}>
-      <h4 className={styles.title}>{title}</h4>
-      <div className={clsx('d-flex mt-10', styles.content)}>
-        <div className={styles.avatars}>
-          {avatars.map((url, i) => (
-            <Avatar
-              key={url}
-              width="45px"
-              height="45px"
-              src={url}
-              className={avatars.length > 1 && i === avatars.length - 1 ? 'lastAvatar' : ''}
-            />
-          ))}
+    <div className={styles.overlay}>
+      <div className={styles.modal}>
+        <img
+          width="24px"
+          height="24px"
+          src="/static/close.svg"
+          alt="Close"
+          className={styles.closeBtn}
+          onClick={onClose}
+        />
+        <div className="mb-30">
+          <h3>Topic</h3>
+          <input
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            className={styles.inputTitle}
+            placeholder="Enter the topic to be discussed"
+          />
         </div>
-        <div className={clsx(styles.info, 'ml-10')}>
-          <ul className={styles.users}>
-            {speakers.map((name, i) => (
-              <li key={name + i}>
-                {name} <img src="/static/cloud.png" alt="Cloud" width={14} height={14} />
-              </li>
-            ))}
-          </ul>
-          <ul className={styles.details}>
-            <li>
-              <img src="/static/user.svg" alt="Users count" width={12} height={12} />{' '}
-              {listenersCount}
-            </li>
-            <li>
-              <img
-                className="ml-5"
-                src="/static/message.svg"
-                alt="Users count"
-                width={12}
-                height={12}
-              />{' '}
-                {speakers.length}
-  
-            </li>
-          </ul>
+        <div className="mb-30">
+          <h3>Room type</h3>
+          <div className="d-flex justify-content-between">
+            <div
+              onClick={() => setType('open')}
+              className={clsx(styles.roomType, { [styles.roomTypeActive]: type === 'open' })}>
+              <img width="70px" height="70px" src="/static/room-type-1.png" alt="Room type" />
+              <h5>Open</h5>
+            </div>
+            <div
+              onClick={() => setType('social')}
+              className={clsx(styles.roomType, { [styles.roomTypeActive]: type === 'social' })}>
+              <img width="70px" height="70px" src="/static/room-type-2.png" alt="Room type" />
+              <h5>Social</h5>
+            </div>
+            <div
+              onClick={() => setType('closed')}
+              className={clsx(styles.roomType, { [styles.roomTypeActive]: type === 'closed' })}>
+              <img width="70px" height="70px" src="/static/room-type-3.png" alt="Room type" />
+              <h5>Closed</h5>
+            </div>
+          </div>
+        </div>
+        <div className={styles.delimiter}></div>
+        <div className="text-center">
+          <h3>Start a room open to everyone</h3>
+          <Button onClick={onSubmit} color="green">
+            <img width="18px" height="18px" src="/static/celebration.png" alt="Celebration" />
+            Let's go
+          </Button>
         </div>
       </div>
     </div>
