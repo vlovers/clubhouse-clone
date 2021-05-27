@@ -2,7 +2,7 @@ import clsx from 'clsx';
 import { WhiteBlock } from '../../WhiteBlock';
 import { Button } from '../../Button';
 import { StepInfo } from '../../StepInfo';
-
+import { Avatar } from '../../Avatar';
 import styles from './EnterNameStep.module.scss';
 import React from 'react';
 import { MainContext } from '../../../pages';
@@ -31,7 +31,8 @@ export const EnterNameStep = () => {
         description="People use real names on Clubhouse :) Thnx!"
       />
       <WhiteBlock className={clsx('m-auto', styles.whiteBlock)}>
-        <div className="mb-30">
+        <Avatar src={userData.avatarUrl} width="120px" height="120px" />
+        <div className="mt-30 mb-30">
           <input
             onChange={handleChangeInput}
             value={inputValue}

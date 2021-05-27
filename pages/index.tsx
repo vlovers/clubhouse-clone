@@ -8,6 +8,7 @@ import { EnterCodeStep } from '../components/steps/EnterCodeStep';
 import { checkAuth } from '../utils/checkAuth';
 import { Axios } from '../core/axios';
 import { Api } from '../api';
+import { getFontDefinitionFromManifest, getFontDefinitionFromNetwork } from 'next/dist/next-server/server/font-utils';
 
 const stepsComponents = {
   0: WelcomeStep,
@@ -55,8 +56,7 @@ const getFormStep = (): number => {
     }
   }
   return 0;
-};
-
+};  
 
 export const MainContext = React.createContext<MainContextProps>({} as MainContextProps);
 

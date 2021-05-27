@@ -1,8 +1,10 @@
 import clsx from 'clsx';
 import { useRouter } from 'next/router';
 import React from 'react';
-import { RoomApi, RoomType } from '../../api/RoomApi';
-import { Axios } from '../../core/axios';
+import { Room, RoomType } from '../../api/RoomApi';
+import { useAsyncAction } from '../../hooks/useAction';
+import { fetchCreateRoom } from '../../redux/slices/roomsSlice';
+
 import { Button } from '../Button';
 
 import styles from './StartRoomModal.module.scss';
@@ -15,20 +17,15 @@ export const StartRoomModal: React.FC<StartRoomModalProps> = ({ onClose }) => {
   const router = useRouter();
   const [title, setTitle] = React.useState<string>('');
   const [type, setType] = React.useState<RoomType>('open');
+  const createRoom = useAsyncAction<any, Room>(fetchCreateRoom);
 
   const onSubmit = async () => {
-    try {
-      if (!title) {
-        return alert('Укажите заголовок комнаты');
-      }
-      const room = await RoomApi(Axios).createRoom({
-        title,
-        type,
-      });
-      router.push(`/rooms/${room.id}`);
-    } catch (error) {
-      alert('Ошибка при создании команты');
-    }
+    if (!title) {
+      return alert('Укажите заголовок комнаты');
+    };
+    const data: Room = await createRoom({ title, type });
+    router.push(`/rooms/${data.id}`);
+
   };
 
   return (
