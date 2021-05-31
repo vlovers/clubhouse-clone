@@ -81,7 +81,22 @@ io.on('connection', (socket) => {
     );
   });
 
+  socket.on('CLIENT@ROOMS:CALL', ({ user, roomId, signal }) => {
+    socket.broadcast.to(`room/${roomId}`).emit('SERVER@ROOMS:CALL', {
+      user,
+      signal,
+    });
+  });
+
+  socket.on('CLIENT@ROOMS:ANSWER', ({ targetUserId, roomId, signal }) => {
+    socket.broadcast.to(`room/${roomId}`).emit('SERVER@ROOMS:ANSWER', {
+      targetUserId,
+      signal,
+    });
+  });
+
   socket.on('disconnect', () => {
+    console.log('USERS:' + rooms);
     if (rooms[socket.id]) {
       const { roomId, user } = rooms[socket.id];
       socket.broadcast.to(`room/${roomId}`).emit('SERVER@ROOMS:LEAVE', user);
